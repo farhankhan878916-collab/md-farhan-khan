@@ -1,0 +1,109 @@
+<div class="seat-page container" *ngIf="show">
+  <!-- Top Bar Navigation & Movie Details -->
+  <div class="booking-top-bar glass-card">
+    <div class="movie-brief">
+      <h2>{{ show.movieTitle }}</h2>
+      <div class="brief-meta">
+        <span><i class="fa-solid fa-location-dot"></i> {{ show.theatreName }} ({{ show.screenName }})</span>
+        <span><i class="fa-regular fa-clock"></i> {{ show.startTime | date:'EEE, MMM d, hh:mm a' }}</span>
+      </div>
+    </div>
+
+    <div class="seat-type-legend">
+      <div class="legend-item"><span class="legend-box available-box"></span> Available</div>
+      <div class="legend-item"><span class="legend-box selected-box"></span> Selected</div>
+      <div class="legend-item"><span class="legend-box booked-box"></span> Booked</div>
+    </div>
+  </div>
+
+  <!-- VACANT SEAT RECOMMENDATION BANNER -->
+  <div *ngIf="showRecommendationAlert" class="alert alert-warning recommendation-banner">
+    <div class="recommendation-info">
+      <i class="fa-solid fa-wand-magic-sparkles magic-icon"></i>
+      <div>
+        <strong>Smart Seat Assistant:</strong> {{ recommendationMessage }}
+      </div>
+    </div>
+    <div class="recommendation-actions">
+      <button *ngIf="recommendedSeat" (click)="acceptRecommendedSeat()" class="btn btn-primary btn-sm">
+        <i class="fa-solid fa-check"></i> Select {{ recommendedSeat.seatIdentifier }}
+      </button>
+      <button (click)="dismissRecommendation()" class="btn btn-secondary btn-sm">
+        <i class="fa-solid fa-xmark"></i> Dismiss
+      </button>
+    </div>
+  </div>
+
+  <!-- DOUBLE BOOKING ERROR ALERT -->
+  <div *ngIf="doubleBookingError" class="alert alert-danger">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ doubleBookingError }}</span>
+  </div>
+
+  <!-- CINEMA SEATING STAGE -->
+  <div class="cinema-stage glass-card">
+    <!-- Curved Screen Indicator -->
+    <div class="screen-container">
+      <div class="curved-screen"></div>
+      <p class="screen-text"><i class="fa-solid fa-eye"></i> SCREEN THIS WAY (ALL EYES FORWARD)</p>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <p>Configuring seat layout...</p>
+    </div>
+
+    <!-- Seat Matrix Grid -->
+    <div *ngIf="!isLoading" class="seat-matrix">
+      <div *ngFor="let row of rowKeys" class="seat-row">
+        <div class="row-label">{{ row }}</div>
+
+        <div class="seats-lane">
+          <button *ngFor="let seat of groupedSeats[row]"
+                  (click)="onSeatClick(seat)"
+                  class="seat-btn"
+                  [ngClass]="[
+                    seat.status.toLowerCase(),
+                    'seat-' + seat.seatType.toLowerCase()
+                  ]"
+                  [title]="seat.seatIdentifier + ' (' + seat.seatType + ') - $' + seat.price"
+                  [disabled]="false">
+            <span class="seat-num">{{ seat.seatNumber }}</span>
+            <i *ngIf="seat.status === 'BOOKED'" class="fa-solid fa-xmark booked-icon"></i>
+          </button>
+        </div>
+
+        <div class="row-label">{{ row }}</div>
+      </div>
+    </div>
+
+    <!-- Seat Category Pricing Legend -->
+    <div class="category-pricing">
+      <div class="cat-pill"><span class="cat-dot regular-dot"></span> Regular: ${{ (show.basePrice * 1.0) | number:'1.2-2' }}</div>
+      <div class="cat-pill"><span class="cat-dot premium-dot"></span> Premium: ${{ (show.basePrice * 1.5) | number:'1.2-2' }}</div>
+      <div class="cat-pill"><span class="cat-dot vip-dot"></span> VIP: ${{ (show.basePrice * 2.0) | number:'1.2-2' }}</div>
+    </div>
+  </div>
+
+  <!-- STICKY BOTTOM CHECKOUT TRAY -->
+  <div class="bottom-checkout-tray glass-card">
+    <div class="tray-content container">
+      <div class="tray-selection">
+        <span class="tray-label">Selected Seats ({{ selectedSeats.length }}):</span>
+        <span class="tray-seats">{{ selectedSeats.length > 0 ? getSelectedSeatIdentifiers() : 'None selected' }}</span>
+      </div>
+
+      <div class="tray-pricing">
+        <span class="tray-label">Total Amount:</span>
+        <span class="tray-price">${{ totalPrice | number:'1.2-2' }}</span>
+      </div>
+
+      <button (click)="proceedToSummary()"
+              [disabled]="selectedSeats.length === 0"
+              class="btn btn-primary btn-checkout">
+        Proceed to Payment <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

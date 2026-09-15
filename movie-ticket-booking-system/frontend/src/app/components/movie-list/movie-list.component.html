@@ -1,0 +1,85 @@
+<div class="movie-list-page">
+  <!-- Hero Featured Banner -->
+  <section class="hero-section">
+    <div class="container hero-content">
+      <div class="hero-badge"><i class="fa-solid fa-fire"></i> BLOCKBUSTER NOW SHOWING</div>
+      <h1 class="hero-title">Experience Cinema In Stunning IMAX & 4DX</h1>
+      <p class="hero-sub">Book your favorite seats seamlessly with real-time double-booking protection and instant smart vacant seat suggestions.</p>
+
+      <div class="search-bar">
+        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search movies by title, genre, or actor...">
+      </div>
+    </div>
+  </section>
+
+  <!-- Movies Section -->
+  <section class="movies-container container">
+    <div class="filter-row">
+      <div class="section-header">
+        <h2>Now Showing</h2>
+        <span class="count-tag">{{ filteredMovies.length }} Movies</span>
+      </div>
+
+      <div class="genre-pills">
+        <button *ngFor="let g of genres"
+                (click)="selectGenre(g)"
+                class="genre-btn"
+                [class.active]="selectedGenre === g">
+          {{ g }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="isLoading" class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <p>Loading premier titles...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && filteredMovies.length === 0" class="empty-state glass-card">
+      <i class="fa-solid fa-film empty-icon"></i>
+      <h3>No Movies Found</h3>
+      <p>We could not find any movies matching your search or filter.</p>
+      <button (click)="selectedGenre = 'ALL'; searchQuery = ''; filterMovies()" class="btn btn-secondary">Reset Filters</button>
+    </div>
+
+    <!-- Movie Grid -->
+    <div *ngIf="!isLoading && filteredMovies.length > 0" class="movie-grid">
+      <div *ngFor="let movie of filteredMovies" class="movie-card glass-card">
+        <div class="poster-wrapper">
+          <img [src]="movie.posterUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80'" [alt]="movie.title" class="poster-img">
+          <div class="poster-overlay">
+            <a [routerLink]="['/movies', movie.id]" class="btn btn-primary btn-book">
+              <i class="fa-solid fa-ticket"></i> Book Now
+            </a>
+          </div>
+          <div class="rating-badge">
+            <i class="fa-solid fa-star star-icon"></i> {{ movie.rating | number:'1.1-1' }}
+          </div>
+        </div>
+
+        <div class="movie-meta">
+          <div class="meta-row">
+            <span class="genre-tag">{{ movie.genre }}</span>
+            <span class="duration-tag"><i class="fa-regular fa-clock"></i> {{ movie.durationMinutes }}m</span>
+          </div>
+
+          <h3 class="movie-title">
+            <a [routerLink]="['/movies', movie.id]">{{ movie.title }}</a>
+          </h3>
+
+          <p class="movie-desc">{{ movie.description }}</p>
+
+          <div class="card-footer">
+            <span class="lang-tag"><i class="fa-solid fa-language"></i> {{ movie.language }}</span>
+            <a [routerLink]="['/movies', movie.id]" class="details-link">
+              View Shows <i class="fa-solid fa-arrow-right"></i>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

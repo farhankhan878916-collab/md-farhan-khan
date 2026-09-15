@@ -1,0 +1,52 @@
+<nav class="navbar">
+  <div class="container nav-content">
+    <a routerLink="/" class="nav-brand">
+      <span class="brand-icon"><i class="fa-solid fa-film"></i></span>
+      <span class="brand-name">Cine<span class="brand-accent">Pass</span></span>
+    </a>
+
+    <div class="nav-links" [class.active]="isMenuOpen">
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="nav-item">
+        <i class="fa-solid fa-compass"></i> Movies
+      </a>
+
+      <ng-container *ngIf="authService.isLoggedIn()">
+        <a routerLink="/my-bookings" routerLinkActive="active" class="nav-item">
+          <i class="fa-solid fa-ticket"></i> My Bookings
+        </a>
+
+        <a *ngIf="authService.isAdmin()" routerLink="/admin" routerLinkActive="active" class="nav-item admin-link">
+          <i class="fa-solid fa-chart-line"></i> Admin Dashboard
+        </a>
+      </ng-container>
+    </div>
+
+    <div class="nav-actions">
+      <ng-container *ngIf="authService.currentUser$ | async as user; else guestTpl">
+        <div class="user-profile">
+          <div class="user-avatar">
+            {{ user.fullName.charAt(0) }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ user.fullName }}</span>
+            <span class="user-role">{{ user.role === 'ROLE_ADMIN' ? 'Admin' : 'Customer' }}</span>
+          </div>
+          <button (click)="logout()" class="btn-icon" title="Logout">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+      </ng-container>
+
+      <ng-template #guestTpl>
+        <div class="guest-actions">
+          <a routerLink="/login" class="btn btn-secondary btn-sm">Sign In</a>
+          <a routerLink="/register" class="btn btn-primary btn-sm">Sign Up</a>
+        </div>
+      </ng-template>
+
+      <button class="mobile-toggle" (click)="toggleMenu()">
+        <i class="fa-solid" [class.fa-bars]="!isMenuOpen" [class.fa-xmark]="isMenuOpen"></i>
+      </button>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,60 @@
+<div class="my-bookings-page container">
+  <div class="page-title-row">
+    <div>
+      <h1><i class="fa-solid fa-ticket"></i> My Bookings & Tickets</h1>
+      <p class="sub-text">View your reservation history, digital e-passes, and cancellation status</p>
+    </div>
+  </div>
+
+  <div *ngIf="actionMessage" class="alert alert-success">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ actionMessage }}</span>
+  </div>
+
+  <div *ngIf="isLoading" class="loading-state">
+    <i class="fa-solid fa-spinner fa-spin"></i>
+    <p>Retrieving your bookings...</p>
+  </div>
+
+  <div *ngIf="!isLoading && bookings.length === 0" class="empty-state glass-card">
+    <i class="fa-solid fa-ticket empty-icon"></i>
+    <h3>No Bookings Found</h3>
+    <p>You haven't booked any movie tickets yet. Check out the latest blockbusters now showing!</p>
+    <a routerLink="/" class="btn btn-primary">Browse Now Showing</a>
+  </div>
+
+  <div *ngIf="!isLoading && bookings.length > 0" class="bookings-list">
+    <div *ngFor="let b of bookings" class="booking-item glass-card">
+      <div class="item-movie-thumb">
+        <img [src]="b.moviePosterUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=300&q=80'" [alt]="b.movieTitle">
+      </div>
+
+      <div class="item-info">
+        <div class="item-header-row">
+          <h3 class="movie-title">{{ b.movieTitle }}</h3>
+          <span class="status-badge" [class.confirmed]="b.bookingStatus === 'CONFIRMED'" [class.cancelled]="b.bookingStatus === 'CANCELLED'">
+            {{ b.bookingStatus }}
+          </span>
+        </div>
+
+        <p class="cinema-name"><i class="fa-solid fa-location-dot"></i> {{ b.theatreName }} - {{ b.screenName }}</p>
+        <p class="showtime"><i class="fa-regular fa-clock"></i> {{ b.showStartTime | date:'EEE, MMM d, y - hh:mm a' }}</p>
+
+        <div class="item-meta-chips">
+          <span class="seat-tag"><i class="fa-solid fa-chair"></i> Seats: {{ b.seatNumbers.join(', ') }}</span>
+          <span class="ref-tag">Ref: {{ b.bookingNumber }}</span>
+          <span class="paid-tag">${{ b.totalAmount | number:'1.2-2' }} ({{ b.paymentMethod }})</span>
+        </div>
+      </div>
+
+      <div class="item-actions">
+        <button (click)="viewTicket(b.bookingNumber)" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-qrcode"></i> View Pass
+        </button>
+        <button *ngIf="b.bookingStatus === 'CONFIRMED'" (click)="cancelBooking(b)" class="btn btn-secondary btn-sm btn-cancel">
+          <i class="fa-solid fa-ban"></i> Cancel Booking
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

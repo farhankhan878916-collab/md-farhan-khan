@@ -1,0 +1,74 @@
+<div class="movie-details-page" *ngIf="movie">
+  <!-- Movie Banner Header -->
+  <div class="movie-backdrop" [style.background-image]="'linear-gradient(to bottom, rgba(15,16,22,0.6), rgba(15,16,22,1)), url(' + (movie.posterUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=1200&q=80') + ')'">
+    <div class="container backdrop-content">
+      <div class="poster-box glass-card">
+        <img [src]="movie.posterUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=600&q=80'" [alt]="movie.title">
+      </div>
+
+      <div class="movie-info">
+        <div class="badge-row">
+          <span class="badge badge-regular">{{ movie.genre }}</span>
+          <span class="badge badge-vip"><i class="fa-solid fa-star"></i> {{ movie.rating | number:'1.1-1' }} IMDb</span>
+          <span class="badge badge-premium">{{ movie.language }}</span>
+        </div>
+
+        <h1 class="movie-title">{{ movie.title }}</h1>
+
+        <div class="meta-chips">
+          <span><i class="fa-regular fa-clock"></i> {{ movie.durationMinutes }} Minutes</span>
+          <span><i class="fa-regular fa-calendar"></i> {{ movie.releaseDate | date:'mediumDate' }}</span>
+          <span><i class="fa-solid fa-film"></i> 2D, 3D, IMAX</span>
+        </div>
+
+        <p class="movie-synopsis">{{ movie.description }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shows & Theatres Section -->
+  <section class="container shows-section">
+    <div class="section-title-wrap">
+      <h2><i class="fa-solid fa-calendar-check"></i> Select Theatre & Showtime</h2>
+      <p class="section-sub">Choose your preferred cinema and timing to begin seat selection</p>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <p>Loading available showtimes...</p>
+    </div>
+
+    <div *ngIf="!isLoading && getTheatreKeys().length === 0" class="empty-shows glass-card">
+      <i class="fa-regular fa-calendar-xmark empty-icon"></i>
+      <h3>No Scheduled Shows Available</h3>
+      <p>There are currently no upcoming shows scheduled for this movie. Please check back later or select another title.</p>
+      <a routerLink="/" class="btn btn-secondary">Browse Other Movies</a>
+    </div>
+
+    <div *ngIf="!isLoading && getTheatreKeys().length > 0" class="theatres-list">
+      <div *ngFor="let theatreKey of getTheatreKeys()" class="theatre-card glass-card">
+        <div class="theatre-header">
+          <div class="theatre-title-area">
+            <h3><i class="fa-solid fa-building-columns"></i> {{ theatreKey }}</h3>
+            <span class="theatre-screens-badge">{{ groupedShows[theatreKey][0].screenName }}</span>
+          </div>
+          <div class="amenity-tags">
+            <span><i class="fa-solid fa-circle-check text-green"></i> M-Ticket</span>
+            <span><i class="fa-solid fa-utensils text-gold"></i> Food Court</span>
+            <span><i class="fa-solid fa-square-parking text-cyan"></i> Parking</span>
+          </div>
+        </div>
+
+        <div class="showtimes-grid">
+          <button *ngFor="let show of groupedShows[theatreKey]"
+                  (click)="selectShow(show.id)"
+                  class="showtime-btn">
+            <span class="show-time">{{ show.startTime | date:'hh:mm a' }}</span>
+            <span class="show-screen">{{ show.screenName }}</span>
+            <span class="show-price">from ${{ show.basePrice | number:'1.2-2' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>

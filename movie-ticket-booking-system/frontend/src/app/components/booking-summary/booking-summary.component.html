@@ -1,0 +1,120 @@
+<div class="summary-page container" *ngIf="show">
+  <div class="page-header">
+    <button (click)="backToSeats()" class="btn-back">
+      <i class="fa-solid fa-arrow-left"></i> Change Seats
+    </button>
+    <h1>Booking Summary & Payment</h1>
+  </div>
+
+  <!-- DOUBLE BOOKING CONFLICT ALERT -->
+  <div *ngIf="errorMessage" class="alert alert-danger conflict-alert">
+    <i class="fa-solid fa-triangle-exclamation alert-icon"></i>
+    <div class="conflict-content">
+      <strong>Seat Conflict Detected:</strong> {{ errorMessage }}
+      <div *ngIf="recommendedSeatOnConflict" class="conflict-rec">
+        <a [routerLink]="['/booking/seats', show.id]" class="btn btn-primary btn-sm">
+          <i class="fa-solid fa-chair"></i> Return to Seat Layout & Select {{ recommendedSeatOnConflict.seatIdentifier }}
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <!-- Left: Movie & Order Breakdown -->
+    <div class="breakdown-card glass-card">
+      <div class="order-movie-header">
+        <img [src]="show.moviePosterUrl || 'https://images.unsplash.com/photo-1536440136628-849c177e76a1?auto=format&fit=crop&w=300&q=80'" [alt]="show.movieTitle" class="order-thumb">
+        <div>
+          <h3>{{ show.movieTitle }}</h3>
+          <p class="order-theatre"><i class="fa-solid fa-location-dot"></i> {{ show.theatreName }} ({{ show.screenName }})</p>
+          <p class="order-time"><i class="fa-regular fa-clock"></i> {{ show.startTime | date:'EEE, MMM d, y, hh:mm a' }}</p>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="ticket-breakdown">
+        <h4>Seats Selected</h4>
+        <div class="seat-badge-list">
+          <span *ngFor="let s of seats" class="seat-pill">
+            {{ s.seatIdentifier }} ({{ s.seatType }}) - ${{ s.price | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="price-calc">
+        <div class="price-row">
+          <span>Tickets Subtotal</span>
+          <span>${{ subtotal | number:'1.2-2' }}</span>
+        </div>
+        <div class="price-row">
+          <span>Taxes & Processing (10%)</span>
+          <span>${{ taxes | number:'1.2-2' }}</span>
+        </div>
+        <div class="price-row total-row">
+          <span>Grand Total</span>
+          <span class="total-amount">${{ grandTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Right: Payment Methods & Action -->
+    <div class="payment-card glass-card">
+      <h3>Select Payment Method</h3>
+      <p class="payment-sub">All transactions are simulated and securely authorized.</p>
+
+      <div class="payment-options">
+        <label class="pay-option" [class.selected]="paymentMethod === 'CARD'">
+          <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="CARD">
+          <div class="option-body">
+            <div class="option-title"><i class="fa-regular fa-credit-card"></i> Credit / Debit Card</div>
+            <span class="option-desc">Visa, Mastercard, American Express</span>
+          </div>
+        </label>
+
+        <label class="pay-option" [class.selected]="paymentMethod === 'UPI'">
+          <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="UPI">
+          <div class="option-body">
+            <div class="option-title"><i class="fa-solid fa-mobile-screen"></i> Instant UPI / QR</div>
+            <span class="option-desc">Google Pay, PhonePe, Paytm, BHIM</span>
+          </div>
+        </label>
+
+        <label class="pay-option" [class.selected]="paymentMethod === 'CASH'">
+          <input type="radio" name="payMethod" [(ngModel)]="paymentMethod" value="CASH">
+          <div class="option-body">
+            <div class="option-title"><i class="fa-solid fa-money-bill-wave"></i> Pay at Box Office</div>
+            <span class="option-desc">Collect tickets at the cinema counter</span>
+          </div>
+        </label>
+      </div>
+
+      <!-- Card details mock input -->
+      <div *ngIf="paymentMethod === 'CARD'" class="card-inputs">
+        <div class="form-group">
+          <label>Card Number</label>
+          <input type="text" class="form-control" value="•••• •••• •••• 4242" readonly>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Expiry</label>
+            <input type="text" class="form-control" value="12/28" readonly>
+          </div>
+          <div class="form-group">
+            <label>CVV</label>
+            <input type="text" class="form-control" value="•••" readonly>
+          </div>
+        </div>
+      </div>
+
+      <button (click)="confirmBooking()" [disabled]="isProcessing" class="btn btn-primary btn-pay-now">
+        <span *ngIf="!isProcessing"><i class="fa-solid fa-lock"></i> Authorize & Pay ${{ grandTotal | number:'1.2-2' }}</span>
+        <span *ngIf="isProcessing"><i class="fa-solid fa-spinner fa-spin"></i> Securing Your Seats...</span>
+      </button>
+
+      <p class="safe-note"><i class="fa-solid fa-shield-halved"></i> Protected by backend concurrency locking against double-booking.</p>
+    </div>
+  </div>
+</div>

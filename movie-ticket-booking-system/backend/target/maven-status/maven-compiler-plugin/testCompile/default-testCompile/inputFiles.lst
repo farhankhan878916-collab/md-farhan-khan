@@ -1,0 +1,4 @@
+/app/applet/movie-ticket-booking-system/backend/src/test/java/com/example/movieticketbooking/service/SeatRecommendationServiceTest.java
+/app/applet/movie-ticket-booking-system/backend/src/test/java/com/example/movieticketbooking/service/BookingServiceConcurrencyTest.java
+/app/applet/movie-ticket-booking-system/backend/src/test/java/com/example/movieticketbooking/MovieTicketBookingApplicationTests.java
+/app/applet/movie-ticket-booking-system/backend/src/test/java/com/example/movieticketbooking/service/MovieServiceTest.java

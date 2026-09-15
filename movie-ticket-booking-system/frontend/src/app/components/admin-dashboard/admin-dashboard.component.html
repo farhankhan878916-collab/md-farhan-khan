@@ -1,0 +1,296 @@
+<div class="admin-page container">
+  <div class="admin-header">
+    <div>
+      <h1><i class="fa-solid fa-chart-line"></i> Operations Management Dashboard</h1>
+      <p class="admin-sub">Monitor theatre analytics, schedule cinema shows, manage titles and bookings</p>
+    </div>
+
+    <div class="header-actions">
+      <button (click)="showAddMovieModal = true" class="btn btn-primary">
+        <i class="fa-solid fa-film"></i> Add Movie
+      </button>
+      <button (click)="showAddShowModal = true" class="btn btn-secondary">
+        <i class="fa-solid fa-calendar-plus"></i> Add Show
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="actionMessage" class="alert alert-success">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ actionMessage }}</span>
+  </div>
+
+  <!-- KPI METRICS -->
+  <div class="kpi-grid" *ngIf="stats">
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-revenue"><i class="fa-solid fa-sack-dollar"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Total Gross Revenue</span>
+        <h2 class="kpi-val">${{ stats.totalRevenue | number:'1.2-2' }}</h2>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-bookings"><i class="fa-solid fa-ticket"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Total Bookings</span>
+        <h2 class="kpi-val">{{ stats.totalBookings }}</h2>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-seats"><i class="fa-solid fa-chair"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Booked Seats</span>
+        <h2 class="kpi-val">{{ stats.bookedSeats }}</h2>
+      </div>
+    </div>
+
+    <div class="kpi-card glass-card">
+      <div class="kpi-icon icon-users"><i class="fa-solid fa-users"></i></div>
+      <div class="kpi-body">
+        <span class="kpi-lbl">Registered Patrons</span>
+        <h2 class="kpi-val">{{ stats.totalUsers }}</h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS NAV -->
+  <div class="admin-tabs">
+    <button (click)="activeTab = 'OVERVIEW'" [class.active]="activeTab === 'OVERVIEW'" class="tab-btn">
+      <i class="fa-solid fa-chart-pie"></i> Overview
+    </button>
+    <button (click)="activeTab = 'MOVIES'" [class.active]="activeTab === 'MOVIES'" class="tab-btn">
+      <i class="fa-solid fa-film"></i> Movies ({{ movies.length }})
+    </button>
+    <button (click)="activeTab = 'BOOKINGS'" [class.active]="activeTab === 'BOOKINGS'" class="tab-btn">
+      <i class="fa-solid fa-ticket"></i> Bookings ({{ bookings.length }})
+    </button>
+    <button (click)="activeTab = 'USERS'" [class.active]="activeTab === 'USERS'" class="tab-btn">
+      <i class="fa-solid fa-users"></i> Users ({{ users.length }})
+    </button>
+  </div>
+
+  <!-- TAB 1: OVERVIEW -->
+  <div *ngIf="activeTab === 'OVERVIEW'" class="tab-content">
+    <div class="overview-grid">
+      <div class="glass-card">
+        <h3>Recent Transactions</h3>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Ref</th>
+              <th>Customer</th>
+              <th>Movie</th>
+              <th>Seats</th>
+              <th>Total</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of bookings.slice(0, 5)">
+              <td><code>{{ b.bookingNumber }}</code></td>
+              <td>{{ b.customerName }}</td>
+              <td>{{ b.movieTitle }}</td>
+              <td>{{ b.seatNumbers.join(', ') }}</td>
+              <td class="text-green">${{ b.totalAmount | number:'1.2-2' }}</td>
+              <td><span class="badge" [class.badge-regular]="b.bookingStatus === 'CONFIRMED'">{{ b.bookingStatus }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB 2: MOVIES -->
+  <div *ngIf="activeTab === 'MOVIES'" class="tab-content">
+    <div class="glass-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Poster</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Duration</th>
+            <th>Rating</th>
+            <th>Language</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let m of movies">
+            <td><img [src]="m.posterUrl" class="tbl-thumb" alt="poster"></td>
+            <td><strong>{{ m.title }}</strong></td>
+            <td>{{ m.genre }}</td>
+            <td>{{ m.durationMinutes }}m</td>
+            <td><i class="fa-solid fa-star text-gold"></i> {{ m.rating }}</td>
+            <td>{{ m.language }}</td>
+            <td>
+              <button (click)="deleteMovie(m.id, m.title)" class="btn-icon text-danger" title="Delete">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 3: BOOKINGS -->
+  <div *ngIf="activeTab === 'BOOKINGS'" class="tab-content">
+    <div class="glass-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Booking Ref</th>
+            <th>User</th>
+            <th>Movie</th>
+            <th>Showtime</th>
+            <th>Seats</th>
+            <th>Amount</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let b of bookings">
+            <td><code>{{ b.bookingNumber }}</code></td>
+            <td>{{ b.customerName }} ({{ b.customerEmail }})</td>
+            <td>{{ b.movieTitle }}</td>
+            <td>{{ b.showStartTime | date:'short' }}</td>
+            <td>{{ b.seatNumbers.join(', ') }}</td>
+            <td class="text-green">${{ b.totalAmount | number:'1.2-2' }}</td>
+            <td><span class="badge" [class.badge-regular]="b.bookingStatus === 'CONFIRMED'">{{ b.bookingStatus }}</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- TAB 4: USERS -->
+  <div *ngIf="activeTab === 'USERS'" class="tab-content">
+    <div class="glass-card">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Full Name</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let u of users">
+            <td>{{ u.username }}</td>
+            <td>{{ u.fullName }}</td>
+            <td>{{ u.email }}</td>
+            <td><span class="badge" [class.badge-vip]="u.role === 'ROLE_ADMIN'" [class.badge-regular]="u.role !== 'ROLE_ADMIN'">{{ u.role }}</span></td>
+            <td><span [class.text-green]="u.active" [class.text-danger]="!u.active">{{ u.active ? 'ACTIVE' : 'SUSPENDED' }}</span></td>
+            <td>
+              <button (click)="toggleUser(u)" class="btn btn-secondary btn-xs">
+                {{ u.active ? 'Suspend' : 'Activate' }}
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD MOVIE -->
+  <div *ngIf="showAddMovieModal" class="modal-overlay">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>Add New Movie Title</h3>
+        <button (click)="showAddMovieModal = false" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form [formGroup]="movieForm" (ngSubmit)="submitMovie()" class="modal-form">
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" formControlName="title" class="form-control" placeholder="Movie title">
+        </div>
+        <div class="form-group">
+          <label>Description</label>
+          <textarea formControlName="description" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Genre</label>
+            <input type="text" formControlName="genre" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Duration (Mins)</label>
+            <input type="number" formControlName="durationMinutes" class="form-control">
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Language</label>
+            <input type="text" formControlName="language" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Release Date</label>
+            <input type="date" formControlName="releaseDate" class="form-control">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Poster URL</label>
+          <input type="text" formControlName="posterUrl" class="form-control">
+        </div>
+
+        <button type="submit" [disabled]="movieForm.invalid" class="btn btn-primary btn-submit">Save Movie</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD SHOW -->
+  <div *ngIf="showAddShowModal" class="modal-overlay">
+    <div class="modal-card glass-card">
+      <div class="modal-header">
+        <h3>Schedule New Show</h3>
+        <button (click)="showAddShowModal = false" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <form [formGroup]="showForm" (ngSubmit)="submitShow()" class="modal-form">
+        <div class="form-group">
+          <label>Movie</label>
+          <select formControlName="movieId" class="form-control">
+            <option value="">Select Movie</option>
+            <option *ngFor="let m of movies" [value]="m.id">{{ m.title }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Theatre</label>
+          <select formControlName="theatreId" (change)="onTheatreChange()" class="form-control">
+            <option value="">Select Cinema Theatre</option>
+            <option *ngFor="let t of theatres" [value]="t.id">{{ t.name }} ({{ t.city }})</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Screen Auditorium</label>
+          <select formControlName="screenId" class="form-control">
+            <option value="">Select Screen</option>
+            <option *ngFor="let s of theatreScreens" [value]="s.id">{{ s.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label>Showtime (Local Date & Time)</label>
+            <input type="datetime-local" formControlName="startTime" class="form-control">
+          </div>
+          <div class="form-group">
+            <label>Base Price ($)</label>
+            <input type="number" formControlName="basePrice" class="form-control" step="0.5">
+          </div>
+        </div>
+
+        <button type="submit" [disabled]="showForm.invalid" class="btn btn-primary btn-submit">Schedule Show</button>
+      </form>
+    </div>
+  </div>
+</div>

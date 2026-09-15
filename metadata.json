@@ -1,0 +1,6 @@
+{
+  "name": "Movie Ticket Booking System",
+  "description": "Full-stack production-grade Movie Ticket Booking System with Spring Boot, Angular, MySQL, visual cinema seat layout, double-booking prevention, and vacant seat recommendation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
